@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dish Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpiZrsLm2mlTCJv-sJKOWMwKKi66yErTs"></script>
+    <script src="restaurant.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome to TheTestTrial</h1>
+            <p>Find restaurants serving your favorite dishes</p>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="dishInput" placeholder="Enter a dish name...">
+            <button id="searchBtn">Search</button>
+            <div id="suggestionsContainer" class="suggestions-container"></div>
+        </div>
+        
+
+        <div class="results-container">
+            <div class="restaurants-list">
+                <h2>Restaurants</h2>
+                <div id="restaurantsResults"></div>
+            </div>
+            <div class="map-container">
+                <h2>Location</h2>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

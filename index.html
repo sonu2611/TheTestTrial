@@ -1,39 +1,790 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TheTestTrial</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="image.svg" type="image/png">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpiZrsLm2mlTCJv-sJKOWMwKKi66yErTs"></script>
-    <script src="restaurant.js"></script>
-    <script src="script.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f4eb">
+<title>TheTestTrial — Restaurant Discovery &amp; Table Booking</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbf8f2;
+  --surface: #ffffff;
+  --surface-soft: #f3eee4;
+  --ink: #29241f;
+  --muted: #756c61;
+  --line: #e9e1d5;
+  --accent: #d9572b;
+  --accent-dark: #a93a18;
+  --accent-soft: #fae5d9;
+  --green: #35654d;
+  --shadow: 0 18px 50px rgba(53, 37, 22, .09);
+  --radius: 22px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5; }
+button, input, select, textarea { font: inherit; }
+button, a, select { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 3px; }
+#app { min-height: 100vh; background: var(--bg); border-radius: 0; overflow: clip; }
+.container { width: min(1160px, calc(100% - 42px)); margin-inline: auto; }
+.demo-banner { background: #2e2721; color: #f5e6d2; font-size: 12px; letter-spacing: .025em; text-align: center; padding: 8px 18px; }
+.demo-banner strong { color: #ffc09f; }
+.nav-wrap { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(16px); border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent); }
+.nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 850; font-size: 21px; letter-spacing: -.065em; white-space: nowrap; }
+.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px 13px 13px 5px; background: var(--accent); color: white; font-size: 20px; letter-spacing: -.1em; box-shadow: 0 7px 18px rgba(217,87,43,.22); }
+.brand span:last-child { letter-spacing: -.045em; }
+.nav-links { display: flex; align-items: center; gap: clamp(14px, 2.5vw, 30px); color: var(--muted); font-size: 13px; font-weight: 650; }
+.nav-links a:hover { color: var(--accent); }
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+.btn { border: 1px solid transparent; border-radius: 999px; padding: 11px 17px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; font-weight: 750; line-height: 1.2; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--accent); color: white; box-shadow: 0 8px 18px rgba(217,87,43,.18); }
+.btn-primary:hover { background: var(--accent-dark); box-shadow: 0 10px 24px rgba(217,87,43,.24); }
+.btn-quiet { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn-quiet:hover { background: var(--surface-soft); }
+.btn-dark { background: #302a24; color: #fff8ef; }
+.btn-small { padding: 9px 12px; font-size: 12px; }
+.icon { width: 17px; height: 17px; display: inline-block; flex: 0 0 auto; }
+.hero { padding: 46px 0 37px; }
+.hero-shell { position: relative; min-height: 445px; border-radius: 30px; overflow: hidden; background: #2f241c; isolation: isolate; display: flex; align-items: stretch; box-shadow: var(--shadow); }
+.hero-art { position: absolute; inset: 0 0 0 32%; z-index: -2; background: #4b3024 url("https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1800&q=85") center 52% / cover no-repeat; }
+.hero-art svg { display: none; }
+.hero-shell::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(38,28,21,.97) 0%, rgba(38,28,21,.93) 34%, rgba(38,28,21,.44) 62%, rgba(38,28,21,.08) 100%), linear-gradient(0deg, rgba(35,24,17,.18), transparent 45%); }
+.hero-copy { width: 64%; max-width: 675px; padding: 53px 42px 82px 55px; color: #fff8ef; }
+.eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 11px; text-transform: uppercase; letter-spacing: .16em; font-weight: 800; color: #ffc09f; }
+.eyebrow::before { content: ""; width: 23px; height: 2px; border-radius: 9px; background: #fa9168; }
+.hero h1 { font-size: clamp(40px, 5.2vw, 65px); line-height: .99; letter-spacing: -.065em; margin: 22px 0 18px; font-weight: 820; max-width: 660px; }
+.hero h1 .warm { color: #ff9a70; }
+.hero-copy p { color: #e3d5c6; max-width: 520px; margin: 0; font-size: 15px; line-height: 1.72; }
+.hero-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 25px; }
+.hero-buttons .btn-quiet { color: #fff7ed; border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.07); }
+.hero-note { font-size: 11px; color: #d1bcaa; margin-top: 22px; }
+.hero-note span { color: #ffb28d; }
+.search-card { position: relative; margin: -44px auto 0; z-index: 4; width: min(1050px, calc(100% - 72px)); background: var(--surface); padding: 17px; border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 20px 55px rgba(43,29,18,.15); }
+.search-grid { display: grid; grid-template-columns: 1.45fr 1fr 1fr auto; align-items: end; gap: 10px; }
+.field label { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: .1em; margin: 0 0 7px 5px; }
+.field-control { width: 100%; min-width: 0; height: 45px; padding: 0 13px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink); outline: none; font-size: 13px; }
+.field-control::placeholder { color: color-mix(in srgb, var(--muted) 80%, transparent); }
+.field-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+.search-submit { height: 45px; padding-inline: 20px; white-space: nowrap; }
+.quick-row { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+.quick-label { font-size: 11px; font-weight: 750; color: var(--muted); margin-right: 3px; }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 8px 13px; font-size: 11px; font-weight: 700; transition: all .18s ease; }
+.chip:hover, .chip.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+.section { padding: 56px 0 22px; }
+.section-head { display: flex; justify-content: space-between; gap: 25px; align-items: end; margin-bottom: 24px; }
+.kicker { color: var(--accent); text-transform: uppercase; letter-spacing: .14em; font-size: 10px; font-weight: 850; }
+h2 { font-size: clamp(27px, 3vw, 37px); line-height: 1.1; letter-spacing: -.055em; margin: 8px 0 0; font-weight: 820; }
+.section-sub { color: var(--muted); font-size: 13px; margin: 10px 0 0; max-width: 560px; }
+.text-link { color: var(--accent); font-size: 12px; font-weight: 800; white-space: nowrap; border: 0; background: none; padding: 8px 0; }
+.text-link:hover { text-decoration: underline; }
+.cuisine-grid { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); gap: 12px; }
+.cuisine { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 15px 6px 13px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; color: var(--ink); transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+.cuisine:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--accent-soft); }
+.cuisine-emoji { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 17px; background: var(--surface-soft); font-size: 27px; }
+.cuisine span:last-child { font-size: 11px; font-weight: 750; text-align: center; }
+.discovery { padding-top: 60px; }
+.listing-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 22px 0 20px; }
+.filter-set { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filter-select { height: 37px; border: 1px solid var(--line); color: var(--ink); background: var(--surface); border-radius: 10px; padding: 0 10px; font-size: 11px; font-weight: 650; }
+.result-count { color: var(--muted); font-size: 12px; }
+.restaurant-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; }
+.restaurant-card { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; }
+.restaurant-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.food-art { height: 220px; position: relative; overflow: hidden; display: grid; place-items: center; background: var(--art-bg, linear-gradient(135deg,#c68b55,#ebc89c)); isolation: isolate; }
+.food-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease; }
+.restaurant-card:hover .food-photo { transform: scale(1.055); }
+.food-art::before, .food-art::after { content: ""; position: absolute; border-radius: 50%; z-index: -1; }
+.food-art::before { width: 220px; height: 220px; background: rgba(255,246,222,.18); top: -90px; left: -40px; }
+.food-art::after { width: 175px; height: 175px; background: rgba(55,32,20,.1); bottom: -90px; right: -35px; }
+.food-art .plate { display: none; width: 150px; height: 150px; place-items: center; border-radius: 50%; background: #faf4e8; border: 9px solid rgba(255,255,255,.48); box-shadow: 0 16px 28px rgba(45,29,18,.18), inset 0 0 0 2px rgba(100,75,48,.1); font-size: 70px; transform: rotate(-8deg); }
+.food-art .plate.small { font-size: 62px; }
+.food-art .art-caption { position: absolute; z-index: 1; left: 12px; right: auto; top: 12px; padding: 6px 9px; background: rgba(255,248,237,.92); color: #5a4434; border-radius: 999px; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.art-jaipur { --art-bg: linear-gradient(140deg,#c45b32,#e8a36e 55%,#f2d0a0); }
+.art-delhi { --art-bg: linear-gradient(140deg,#4f6650,#94aa82 54%,#d4d9af); }
+.art-hyd { --art-bg: linear-gradient(140deg,#553e70,#9b78a5 54%,#e3c0b7); }
+.art-mumbai { --art-bg: linear-gradient(140deg,#bd773b,#e8b85c 50%,#f4dfad); }
+.art-bengaluru { --art-bg: linear-gradient(140deg,#49686b,#7eb0a4 52%,#c1dfc2); }
+.art-kolkata { --art-bg: linear-gradient(140deg,#a64f44,#e5a48e 54%,#f0d4ae); }
+.art-pune { --art-bg: linear-gradient(140deg,#625d38,#a7a06b 55%,#e5d8a8); }
+.art-ahmedabad { --art-bg: linear-gradient(140deg,#855b42,#c99973 55%,#e7c9a7); }
+.card-body { padding: 16px; }
+.card-topline { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+.card-name { font-size: 17px; letter-spacing: -.04em; margin: 0; line-height: 1.2; font-weight: 800; }
+.demo-tag { flex: 0 0 auto; border-radius: 6px; background: var(--surface-soft); color: var(--muted); padding: 4px 6px; text-transform: uppercase; font-size: 8px; letter-spacing: .06em; font-weight: 850; }
+.card-meta { color: var(--muted); font-size: 11px; margin-top: 7px; }
+.card-dish { color: var(--ink); font-size: 12px; margin: 13px 0; }
+.card-stats { display: flex; justify-content: space-between; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+.card-stats strong { color: var(--ink); font-size: 11px; }
+.card-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+.card-actions .btn { flex: 1 1 auto; padding: 10px 9px; font-size: 10px; }
+.empty-state { display: none; grid-column: 1/-1; background: var(--surface); border: 1px dashed var(--line); border-radius: 20px; padding: 42px 20px; text-align: center; }
+.empty-state .big { font-size: 34px; }
+.empty-state h3 { margin: 8px 0; }
+.empty-state p { color: var(--muted); font-size: 13px; margin: 0 0 17px; }
+.city-section { padding: 60px 0 62px; }
+.city-grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; gap: 13px; }
+.city-tile { position: relative; overflow: hidden; min-height: 145px; display: flex; flex-direction: column; justify-content: end; border-radius: 18px; padding: 18px; color: white; isolation: isolate; background: linear-gradient(135deg,#62422e,#bd7047); }
+.city-tile::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--city-bg); }
+.city-tile::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg,rgba(25,20,16,.76),rgba(25,20,16,0) 90%); }
+.city-tile .city-mark { position: absolute; right: 14px; top: 10px; font-size: 48px; opacity: .63; filter: saturate(.7); }
+.city-tile h3 { margin: 0; font-size: 20px; letter-spacing: -.04em; }
+.city-tile p { margin: 4px 0 0; font-size: 10px; color: #f6e7da; }
+.city-jaipur { --city-bg: radial-gradient(circle at 73% 18%,#f3bf74 0 10%,transparent 11%), linear-gradient(145deg,#b36e53,#6b4547 60%,#362f39); }
+.city-delhi { --city-bg: linear-gradient(140deg,#667456,#b99a6f 50%,#584338); }
+.city-mumbai { --city-bg: linear-gradient(145deg,#27535b,#69918b 50%,#d48a58); }
+.city-bengaluru { --city-bg: linear-gradient(145deg,#9f784c,#5b775d 55%,#314a41); }
+.how { padding: 56px 0 66px; background: var(--surface-soft); }
+.steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 15px; margin-top: 25px; }
+.step { border-radius: 18px; border: 1px solid var(--line); background: var(--surface); padding: 22px; }
+.step-no { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 850; font-size: 12px; }
+.step h3 { margin: 16px 0 7px; font-size: 16px; letter-spacing: -.03em; }
+.step p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.cta-band { padding: 52px 0; }
+.cta-inner { background: #31251f; color: white; display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 34px 38px; border-radius: 24px; }
+.cta-inner h2 { margin: 0; font-size: clamp(25px,3vw,34px); }
+.cta-inner p { color: #d9c9ba; font-size: 12px; margin: 9px 0 0; }
+.cta-inner .btn { flex: 0 0 auto; }
+footer { padding: 26px 0 32px; border-top: 1px solid var(--line); }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; color: var(--muted); font-size: 10px; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 18px; }
+.footer-links button { background: none; border: 0; padding: 0; color: var(--muted); font-size: 10px; }
+.footer-links button:hover { color: var(--accent); }
+.modal-backdrop { position: fixed; inset: 0; z-index: 100; display: none; place-items: center; padding: 20px; background: rgba(25,20,16,.62); backdrop-filter: blur(5px); }
+.modal-backdrop.open { display: grid; }
+.modal { width: min(690px, 100%); max-height: min(88vh, 850px); overflow: auto; background: var(--surface); color: var(--ink); border-radius: 24px; box-shadow: 0 30px 100px rgba(0,0,0,.28); animation: rise .2s ease both; }
+.modal-wide { width: min(790px,100%); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal-head { display: flex; align-items: start; justify-content: space-between; gap: 15px; padding: 22px 24px 17px; border-bottom: 1px solid var(--line); }
+.modal-head h2 { font-size: 24px; margin: 0; }
+.modal-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.close-btn { border: 1px solid var(--line); width: 35px; height: 35px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 50%; color: var(--muted); background: var(--bg); font-size: 19px; }
+.modal-content { padding: 22px 24px 24px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid .full { grid-column: 1/-1; }
+.help-text { font-size: 10px; color: var(--muted); line-height: 1.6; }
+.form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
+.demo-warning { background: var(--accent-soft); color: var(--accent-dark); border-radius: 12px; padding: 11px 13px; font-size: 11px; line-height: 1.6; margin-bottom: 17px; }
+.detail-hero { height: 240px; border-radius: 15px; background: var(--art-bg, linear-gradient(135deg,#c68b55,#ebc89c)); display: grid; place-items: center; font-size: 60px; margin-bottom: 17px; overflow: hidden; position: relative; background-position: center; background-size: cover; }
+.detail-hero span { display: none; }
+.detail-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+.detail-item { background: var(--bg); border: 1px solid var(--line); padding: 12px; border-radius: 12px; }
+.detail-item .label { color: var(--muted); font-size: 9px; text-transform: uppercase; font-weight: 800; letter-spacing: .1em; }
+.detail-item strong { display: block; font-size: 12px; margin-top: 5px; }
+.menu-category { margin: 15px 0; }
+.menu-category h3 { font-size: 13px; margin: 0 0 9px; }
+.menu-item { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 12px; }
+.menu-item small { display: block; color: var(--muted); margin-top: 3px; font-size: 10px; }
+.menu-price { font-weight: 800; white-space: nowrap; }
+.reservation-item { display: flex; justify-content: space-between; gap: 14px; padding: 15px; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; }
+.reservation-item h3 { font-size: 14px; margin: 0; }
+.reservation-item p { color: var(--muted); font-size: 11px; margin: 6px 0 0; }
+.ref-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--accent); font-weight: 800; }
+.badge-status { display: inline-flex; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; background: var(--surface-soft); color: var(--muted); padding: 5px 7px; border-radius: 6px; margin-top: 9px; }
+.toast { position: fixed; right: 20px; bottom: 20px; z-index: 200; max-width: min(400px, calc(100% - 40px)); border-radius: 13px; background: #2f2923; color: #fff4e8; padding: 13px 16px; box-shadow: 0 14px 35px rgba(0,0,0,.2); font-size: 12px; opacity: 0; transform: translateY(10px); pointer-events: none; transition: all .22s ease; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.dashboard-panel { border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.dashboard-panel h3 { font-size: 13px; margin: 0 0 9px; }
+.dashboard-panel p, .dashboard-panel li { color: var(--muted); font-size: 11px; line-height: 1.7; }
+.dashboard-panel ul { margin: 0; padding-left: 18px; }
+.mobile-menu { display: none; }
+@media (max-width: 930px) {
+  .nav-links { display: none; }
+  .hero-copy { width: 77%; padding-left: 38px; }
+  .hero-art { left: 28%; }
+  .search-grid { grid-template-columns: 1.3fr 1fr 1fr; }
+  .search-submit { grid-column: 1/-1; width: 100%; }
+  .cuisine-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .restaurant-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .city-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 600px) {
+  .container { width: min(100% - 26px, 1160px); }
+  .demo-banner { font-size: 10px; }
+  .nav { min-height: 65px; gap: 8px; }
+  .brand { font-size: 18px; gap: 7px; }
+  .brand-mark { width: 33px; height: 33px; }
+  .nav-actions .btn-quiet { display: none; }
+  .nav-actions .btn { padding: 10px 12px; font-size: 11px; }
+  .hero { padding-top: 17px; }
+  .hero-shell { min-height: 485px; border-radius: 22px; align-items: end; }
+  .hero-art { inset: 0; }
+  .hero-shell::before { background: linear-gradient(0deg,rgba(38,28,21,.98) 0%,rgba(38,28,21,.9) 47%,rgba(38,28,21,.22) 100%); }
+  .hero-copy { width: 100%; padding: 235px 24px 36px; }
+  .hero h1 { font-size: 43px; margin-top: 15px; }
+  .hero-copy p { font-size: 13px; }
+  .hero-buttons { margin-top: 18px; }
+  .search-card { width: calc(100% - 36px); margin-top: -20px; padding: 13px; border-radius: 17px; }
+  .search-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .search-grid .field:first-child { grid-column: 1/-1; }
+  .search-submit { grid-column: 1/-1; }
+  .quick-row { gap: 7px; }
+  .quick-label { width: 100%; }
+  .chip { padding: 7px 10px; }
+  .section { padding-top: 43px; }
+  .section-head { align-items: start; flex-direction: column; gap: 10px; margin-bottom: 19px; }
+  .cuisine-grid { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+  .cuisine { padding: 10px 3px; border-radius: 14px; }
+  .cuisine-emoji { width: 45px; height: 45px; font-size: 23px; border-radius: 14px; }
+  .cuisine span:last-child { font-size: 10px; }
+  .restaurant-grid { grid-template-columns: 1fr; gap: 14px; }
+  .food-art { height: 190px; }
+  .listing-toolbar { align-items: start; }
+  .filter-set { width: 100%; }
+  .filter-select { flex: 1 1 42%; }
+  .result-count { width: 100%; }
+  .city-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
+  .city-tile { min-height: 135px; padding: 13px; }
+  .city-tile h3 { font-size: 17px; }
+  .city-tile .city-mark { font-size: 38px; }
+  .steps { grid-template-columns: 1fr; }
+  .how { padding: 42px 0; }
+  .cta-inner { flex-direction: column; align-items: start; padding: 26px 22px; }
+  .cta-inner .btn { width: 100%; }
+  .footer-inner { align-items: start; flex-direction: column; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .full { grid-column: auto; }
+  .modal-backdrop { padding: 10px; }
+  .modal { border-radius: 18px; max-height: 92vh; }
+  .modal-head { padding: 18px 17px 14px; }
+  .modal-content { padding: 17px; }
+  .detail-list { grid-template-columns: 1fr; }
+  .reservation-item { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Welcome to TheTestTrial</h1>
-            <p>Find restaurants serving your favorite dishes</p>
-        </header>
-
-        <div class="search-container">
-            <input type="text" id="dishInput" placeholder="Enter a dish name...">
-            <button id="searchBtn">Search</button>
-            <div id="suggestionsContainer" class="suggestions-container"></div>
+<div id="app">
+  <div class="demo-banner"><strong>THE TESTTRIAL</strong> · Restaurant search connected to Supabase · table requests require sign-in</div>
+  <div class="nav-wrap">
+    <nav class="nav container" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="TheTestTrial home"><span class="brand-mark">tt.</span><span>TheTestTrial</span></a>
+      <div class="nav-links">
+        <a href="#discover">Explore</a><a href="#cuisines">Cuisines</a><a href="#how">How it works</a><a href="#cities">Cities</a>
+      </div>
+      <div class="nav-actions"><button class="btn btn-quiet" type="button" id="authOpen">Sign in</button><button class="btn btn-quiet" type="button" id="ownerOpen">For restaurants</button><button class="btn btn-primary" type="button" id="myBookingsBtn">My reservations <span aria-hidden="true">↗</span></button></div>
+    </nav>
+  </div>
+  <main id="top">
+    <section class="hero container" aria-labelledby="hero-title">
+      <div class="hero-shell">
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 1100 760" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustrated warm restaurant interior with golden lights and elegant dining tables">
+            <defs>
+              <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b27b53"/><stop offset=".45" stop-color="#5d3f30"/><stop offset="1" stop-color="#30241f"/></linearGradient>
+              <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#5a3c2d"/><stop offset="1" stop-color="#241c18"/></linearGradient>
+              <linearGradient id="lamp" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe6a3"/><stop offset="1" stop-color="#d48b46"/></linearGradient>
+              <radialGradient id="glow"><stop stop-color="#ffd48a" stop-opacity=".45"/><stop offset="1" stop-color="#ffc47d" stop-opacity="0"/></radialGradient>
+              <pattern id="grain" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M2 4h18M7 14h17M1 24h13" stroke="#f8d2a1" stroke-opacity=".055" stroke-width="2"/></pattern>
+            </defs>
+            <rect width="1100" height="760" fill="url(#wall)"/>
+            <circle cx="820" cy="200" r="320" fill="url(#glow)"/>
+            <rect x="0" y="520" width="1100" height="240" fill="url(#floor)"/>
+            <path d="M0 570L1100 520M0 650L1100 605M220 520L70 760M450 520L360 760M720 520L725 760M900 520L1040 760" stroke="#c28a5c" stroke-opacity=".17" stroke-width="3"/>
+            <g opacity=".9">
+              <path d="M330 520V260a112 112 0 0 1 224 0v260Z" fill="#30231d" stroke="#c89b70" stroke-width="7"/>
+              <path d="M350 520V265a92 92 0 0 1 184 0v255Z" fill="#3d594e"/>
+              <path d="M442 174v346M350 300h184" stroke="#d8b58a" stroke-width="6"/>
+              <path d="M614 520V295a88 88 0 0 1 176 0v225Z" fill="#2d211a" stroke="#b3845a" stroke-width="6"/>
+              <path d="M632 520V300a70 70 0 0 1 140 0v220Z" fill="#75836a"/>
+              <path d="M702 231v289M632 365h140" stroke="#e4bb85" stroke-width="5"/>
+              <path d="M842 520V340a74 74 0 0 1 148 0v180Z" fill="#34251e" stroke="#bd9065" stroke-width="6"/>
+              <path d="M858 520V342a58 58 0 0 1 116 0v178Z" fill="#87694f"/>
+              <path d="M916 288v232M858 395h116" stroke="#e9bf88" stroke-width="4"/>
+            </g>
+            <g stroke="#221912" stroke-width="9" stroke-linecap="round"><path d="M725 0v89M925 0v61M552 0v127"/></g>
+            <g><ellipse cx="725" cy="130" rx="80" ry="67" fill="url(#glow)"/><path d="M671 100Q725 160 779 100L764 133Q725 156 686 133Z" fill="url(#lamp)"/><ellipse cx="725" cy="100" rx="54" ry="14" fill="#f3c77e"/><ellipse cx="725" cy="136" rx="27" ry="7" fill="#ffe5a3"/></g>
+            <g><ellipse cx="925" cy="103" rx="70" ry="65" fill="url(#glow)"/><path d="M878 77Q925 125 972 77L960 107Q925 130 890 107Z" fill="url(#lamp)"/><ellipse cx="925" cy="77" rx="47" ry="12" fill="#f3c77e"/></g>
+            <g><ellipse cx="552" cy="161" rx="78" ry="70" fill="url(#glow)"/><path d="M499 135Q552 194 605 135L591 163Q552 188 513 163Z" fill="url(#lamp)"/><ellipse cx="552" cy="135" rx="53" ry="13" fill="#f3c77e"/></g>
+            <g transform="translate(600 482)"><ellipse cx="120" cy="104" rx="175" ry="28" fill="#160f0b" opacity=".35"/><path d="M-5 20L20 155M245 20L222 155" stroke="#2c2018" stroke-width="17"/><ellipse cx="120" cy="20" rx="150" ry="40" fill="#6c4934" stroke="#b98a61" stroke-width="5"/><ellipse cx="120" cy="11" rx="127" ry="28" fill="#d2ad7e"/><ellipse cx="120" cy="9" rx="45" ry="13" fill="#efe0ba"/><circle cx="102" cy="7" r="6" fill="#a7502f"/><circle cx="122" cy="3" r="7" fill="#53714f"/><circle cx="140" cy="9" r="6" fill="#b66c42"/></g>
+            <g transform="translate(840 555) scale(.8)"><ellipse cx="0" cy="70" rx="112" ry="21" fill="#160f0b" opacity=".35"/><path d="M-72 4L-83 115M72 4L83 115" stroke="#2c2018" stroke-width="16"/><ellipse cx="0" cy="4" rx="112" ry="28" fill="#6c4934" stroke="#b98a61" stroke-width="4"/><ellipse cx="0" cy="-2" rx="92" ry="20" fill="#d2ad7e"/><ellipse cx="0" cy="-3" rx="34" ry="10" fill="#efe0ba"/><circle cx="-14" cy="-5" r="5" fill="#a7502f"/><circle cx="2" cy="-7" r="6" fill="#53714f"/></g>
+            <g transform="translate(430 602) scale(.56)"><ellipse cx="0" cy="60" rx="110" ry="22" fill="#130c09" opacity=".45"/><path d="M-70 4L-82 110M70 4L82 110" stroke="#2c2018" stroke-width="18"/><ellipse cx="0" cy="4" rx="110" ry="28" fill="#694631" stroke="#b98a61" stroke-width="5"/><ellipse cx="0" cy="-3" rx="88" ry="20" fill="#d2ad7e"/></g>
+            <rect width="1100" height="760" fill="url(#grain)"/>
+          </svg>
         </div>
-        
-
-        <div class="results-container">
-            <div class="restaurants-list">
-                <h2>Restaurants</h2>
-                <div id="restaurantsResults"></div>
-            </div>
-            <div class="map-container">
-                <h2>Location</h2>
-                <div id="map"></div>
-            </div>
+        <div class="hero-copy">
+          <div class="eyebrow">Discover India's dining scene</div>
+          <h1 id="hero-title">Good Food.<br>Great Mood.<br><span class="warm">Zero Booking Drama.</span></h1>
+          <p>From street-food favourites to fine dining, discover places worth dressing up for — or showing up hungry for — and reserve your table without the planning chaos.</p>
+          <div class="hero-buttons"><a class="btn btn-primary" href="#discover">Explore restaurants <span aria-hidden="true">↗</span></a><button class="btn btn-quiet" type="button" id="heroBook">Find my table <span aria-hidden="true">⌖</span></button></div>
+          <div class="hero-note"><span>✳</span> Hungry for a vibe? Find your tribe.</div>
         </div>
-    </div>
+      </div>
+      <div class="search-card" role="search" aria-label="Search published restaurants">
+        <form id="searchForm" class="search-grid">
+          <div class="field"><label for="searchQuery">Restaurant, cuisine or dish</label><input id="searchQuery" class="field-control" type="search" placeholder="Biryani, Rajasthani thali, rooftop cafés…" autocomplete="off"></div>
+          <div class="field"><label for="cityQuery">City or locality</label><select id="cityQuery" class="field-control"><option value="">All India</option><option>Jaipur</option><option>Delhi</option><option>Hyderabad</option><option>Mumbai</option><option>Bengaluru</option><option>Kolkata</option><option>Pune</option><option>Ahmedabad</option></select></div>
+          <div class="field"><label for="cuisineQuery">Cuisine mood</label><select id="cuisineQuery" class="field-control"><option value="">Any cuisine</option><option>Rajasthani</option><option>North Indian</option><option>Hyderabadi</option><option>Street Food</option><option>South Indian</option><option>Gujarati</option><option>Bengali</option><option>Café</option></select></div>
+          <button class="btn btn-primary search-submit" type="submit"><span aria-hidden="true">⌕</span> Search places</button>
+        </form>
+      </div>
+      <div class="quick-row" aria-label="Popular searches"><span class="quick-label">A little inspiration</span><button class="chip" data-cuisine="North Indian">North Indian</button><button class="chip" data-cuisine="South Indian">South Indian</button><button class="chip" data-cuisine="Rajasthani">Rajasthani</button><button class="chip" data-cuisine="Punjabi">Punjabi</button><button class="chip" data-cuisine="Bengali">Bengali</button><button class="chip" data-cuisine="Gujarati">Gujarati</button><button class="chip" data-cuisine="Hyderabadi">Hyderabadi biryani</button><button class="chip" data-cuisine="Street Food">Street food</button><button class="chip" data-cuisine="Café">Cafés</button></div>
+    </section>
+
+    <section class="section container" id="cuisines" aria-labelledby="cuisine-title">
+      <div class="section-head"><div><div class="kicker">Good things, grouped</div><h2 id="cuisine-title">What are we craving today?</h2><p class="section-sub">A few of India's many delicious directions. Pick a mood and see where it takes you.</p></div><button class="text-link" id="allCuisinesBtn" type="button">Explore every cuisine ↗</button></div>
+      <div class="cuisine-grid">
+        <button class="cuisine" data-cuisine="North Indian"><span class="cuisine-emoji">🍛</span><span>North Indian</span></button>
+        <button class="cuisine" data-cuisine="South Indian"><span class="cuisine-emoji">🥞</span><span>South Indian</span></button>
+        <button class="cuisine" data-cuisine="Rajasthani"><span class="cuisine-emoji">🥘</span><span>Rajasthani</span></button>
+        <button class="cuisine" data-cuisine="Hyderabadi"><span class="cuisine-emoji">🍚</span><span>Hyderabadi</span></button>
+        <button class="cuisine" data-cuisine="Gujarati"><span class="cuisine-emoji">🫓</span><span>Gujarati</span></button>
+        <button class="cuisine" data-cuisine="Bengali"><span class="cuisine-emoji">🍲</span><span>Bengali</span></button>
+        <button class="cuisine" data-cuisine="Street Food"><span class="cuisine-emoji">🥙</span><span>Street food</span></button>
+        <button class="cuisine" data-cuisine="Café"><span class="cuisine-emoji">☕</span><span>Cafés</span></button>
+      </div>
+    </section>
+
+    <section class="section discovery container" id="discover" aria-labelledby="discover-title">
+      <div class="section-head"><div><div class="kicker">Restaurant discovery</div><h2 id="discover-title">Find your next favourite.</h2><p class="section-sub">Search published restaurant names, cities, cuisines or dishes. Open a listing for its photos, menu details and table-request form.</p></div><button class="text-link" id="clearAllTop" type="button">Reset search ↺</button></div>
+      <div class="listing-toolbar">
+        <div class="filter-set" aria-label="Restaurant filters">
+          <select class="filter-select" id="filterCuisine" aria-label="Filter by cuisine"><option value="">All cuisines</option><option>North Indian</option><option>Rajasthani</option><option>Hyderabadi</option><option>South Indian</option><option>Gujarati</option><option>Bengali</option><option>Street Food</option><option>Café</option></select>
+          <select class="filter-select" id="filterPrice" aria-label="Filter by price"><option value="">Any price</option><option value="budget">Under ₹500</option><option value="mid">₹500–₹900</option><option value="premium">₹900+</option></select>
+          <select class="filter-select" id="filterType" aria-label="Filter by restaurant type"><option value="">Any vibe</option><option value="Fine dining">Fine dining</option><option value="Casual dining">Casual dining</option><option value="Café">Café</option><option value="Street food">Street food</option></select>
+          <select class="filter-select" id="sortBy" aria-label="Sort restaurants"><option value="featured">Sort: Featured</option><option value="price-asc">Price: Low to high</option><option value="price-desc">Price: High to low</option><option value="name">Name: A to Z</option></select>
+          <button class="btn btn-quiet btn-small" id="clearFilters" type="button">Clear all</button>
+        </div>
+        <div class="result-count" id="resultCount" aria-live="polite">Showing demo listings</div>
+      </div>
+      <div class="restaurant-grid" id="restaurantGrid" aria-live="polite"></div>
+    </section>
+
+    <section class="city-section container" id="cities" aria-labelledby="cities-title">
+      <div class="section-head"><div><div class="kicker">A country full of flavour</div><h2 id="cities-title">Choose your food city.</h2><p class="section-sub">Choose a city to filter the published restaurant listings available in the database.</p></div></div>
+      <div class="city-grid">
+        <button class="city-tile city-jaipur" data-city="Jaipur" type="button"><span class="city-mark">⌂</span><h3>Jaipur</h3><p>Royal cravings, modern tables</p></button>
+        <button class="city-tile city-delhi" data-city="Delhi" type="button"><span class="city-mark">✦</span><h3>Delhi</h3><p>Big flavours, bigger choices</p></button>
+        <button class="city-tile city-mumbai" data-city="Mumbai" type="button"><span class="city-mark">〰</span><h3>Mumbai</h3><p>Late nights, lively bites</p></button>
+        <button class="city-tile city-bengaluru" data-city="Bengaluru" type="button"><span class="city-mark">❋</span><h3>Bengaluru</h3><p>Cafés and fresh discoveries</p></button>
+      </div>
+    </section>
+
+    <section class="how" id="how" aria-labelledby="how-title"><div class="container"><div class="kicker">No phone-tag required</div><h2 id="how-title">Three little steps to your table.</h2><p class="section-sub">The idea is simple: less planning ping-pong, more time with the people you're meeting.</p><div class="steps"><article class="step"><div class="step-no">01</div><h3>Find your kind of place</h3><p>Search by city, neighbourhood, cuisine or the dish that's been living rent-free in your head.</p></article><article class="step"><div class="step-no">02</div><h3>Peek at the menu</h3><p>Get the vibe, browse the menu and check the details before you decide. No cart, no checkout — just planning dinner.</p></article><article class="step"><div class="step-no">03</div><h3>Reserve, then relax</h3><p>Choose a time and party size. In a live service, availability is checked before a booking is confirmed.</p></article></div></div></section>
+
+    <section class="cta-band container"><div class="cta-inner"><div><h2>Your next favourite table is out there.</h2><p>Go find it. We'll bring the reservation flow; dinner is up to you.</p></div><button class="btn btn-primary" id="ctaExplore" type="button">Find a restaurant ↗</button></div></section>
+  </main>
+  <footer><div class="container footer-inner"><div>© 2026 TheTestTrial · Built for good food and better plans.</div><div class="footer-links"><button type="button" id="footerOwner">Restaurant owners</button><button type="button" id="footerAdmin">Admin preview</button><button type="button" id="footerAbout">About this prototype</button></div></div></footer>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" role="presentation"><section class="modal" id="modalPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><div><h2 id="modalTitle">Details</h2><p id="modalSubtitle"></p></div><button class="close-btn" type="button" id="modalClose" aria-label="Close dialog">×</button></div><div class="modal-content" id="modalContent"></div></section></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpiZrsLm2mlTCJv-sJKOWMwKKi66yErTs&libraries=places"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  'use strict';
+  const SUPABASE_URL = 'https://glkivgbidftcwtohbnbf.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_S0BsG7lamGcnywnqSaybQQ_BnrOzWBj';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  let currentUser = null;
+  let restaurants = [];
+  const demoRestaurants = [
+    { id: 'tt-jaipur-01', name: 'Kesar Courtyard', city: 'Jaipur', locality: 'Old City · sample locality', cuisine: ['Rajasthani','North Indian'], type: 'Fine dining', price: 780, rating: 4.7, reviews: 126, dish: 'Dal Baati Churma · Rajasthani Thali', emoji: '🥘', art: 'art-jaipur', tag: 'Regional favourite', description: 'A demo listing inspired by warm Rajasthani hospitality, traditional flavours and slow dinners.', hours: 'Demo hours: 12:00 PM–10:30 PM', menu: [{category:'Regional specialities',items:[['Dal Baati Churma','Traditional lentils, baked baati and churma',320],['Rajasthani Thali','A sample spread of regional favourites',480],['Gatte Ki Sabzi','Gram-flour dumplings in a spiced gravy',260]]},{category:'Desserts',items:[['Malai Ghewar','Seasonal Rajasthani-style sweet',180],['Mawa Kachori','Sweet kachori with a rich filling',150]]}] },
+    { id: 'tt-delhi-02', name: 'Dilli Darbar Room', city: 'Delhi', locality: 'Central Delhi · sample locality', cuisine: ['North Indian','Punjabi'], type: 'Casual dining', price: 620, rating: 4.5, reviews: 204, dish: 'Chole Bhature · Dal Makhani', emoji: '🍛', art: 'art-delhi', tag: 'Comfort food', description: 'A demo North Indian dining room for butter-rich classics and unhurried catch-ups.', hours: 'Demo hours: 11:30 AM–11:00 PM', menu: [{category:'From the kitchen',items:[['Chole Bhature','Chickpeas with fluffy fried bread',240],['Dal Makhani','Slow-cooked black lentils',290],['Paneer Tikka','Marinated paneer from the tandoor',280]]},{category:'Breads & sweets',items:[['Butter Naan','Tandoor-baked soft bread',65],['Gulab Jamun','Classic syrup-soaked sweet',100]]}] },
+    { id: 'tt-hyd-03', name: 'Nawaab & Co.', city: 'Hyderabad', locality: 'Banjara Hills · sample locality', cuisine: ['Hyderabadi','North Indian'], type: 'Fine dining', price: 920, rating: 4.8, reviews: 318, dish: 'Hyderabadi Dum Biryani · Haleem', emoji: '🍚', art: 'art-hyd', tag: 'Biryani mood', description: 'A demo listing celebrating fragrant rice, layered spices and a leisurely Hyderabadi meal.', hours: 'Demo hours: 12:00 PM–11:30 PM', menu: [{category:'Rice & biryani',items:[['Hyderabadi Dum Biryani','A sample aromatic dum-style biryani',390],['Vegetable Dum Biryani','Layered rice with seasonal vegetables',310],['Mirchi Ka Salan','Tangy chilli and peanut-style curry',170]]},{category:'House specials',items:[['Haleem','Traditional slow-cooked seasonal speciality',350],['Double Ka Meetha','Bread pudding-style dessert',140]]}] },
+    { id: 'tt-mumbai-04', name: 'Bombay Tiffin Club', city: 'Mumbai', locality: 'Bandra · sample locality', cuisine: ['Street Food','Maharashtrian'], type: 'Casual dining', price: 390, rating: 4.4, reviews: 92, dish: 'Pav Bhaji · Vada Pav · Misal Pav', emoji: '🥙', art: 'art-mumbai', tag: 'Local legends', description: 'A demo casual stop built around Mumbai street-food staples and quick, cheerful meals.', hours: 'Demo hours: 10:00 AM–10:00 PM', menu: [{category:'Street-food staples',items:[['Pav Bhaji','Buttery bread with spiced vegetable mash',190],['Vada Pav','Potato fritter in a soft bun',75],['Misal Pav','Spicy sprout curry with pav',160]]},{category:'Sweet finish',items:[['Kulfi Falooda','Chilled dessert with vermicelli',130],['Cutting Chai','Small glass of spiced tea',35]]}] },
+    { id: 'tt-blr-05', name: 'Filter & Fig', city: 'Bengaluru', locality: 'Indiranagar · sample locality', cuisine: ['Café','South Indian'], type: 'Café', price: 540, rating: 4.6, reviews: 147, dish: 'Filter Coffee · Masala Dosa', emoji: '☕', art: 'art-bengaluru', tag: 'Slow mornings', description: 'A demo neighbourhood café for coffee breaks, light bites and a low-key meet-up.', hours: 'Demo hours: 8:00 AM–9:30 PM', menu: [{category:'South Indian favourites',items:[['Masala Dosa','Crisp dosa with potato masala',190],['Idli & Vada','Steamed rice cakes and lentil fritter',150],['Mini Tiffin','A small sample breakfast combo',220]]},{category:'Coffee & treats',items:[['Filter Coffee','South Indian-style filter coffee',75],['Banana Bread','House-style baked slice',140]]}] },
+    { id: 'tt-kolkata-06', name: 'Mishti House Table', city: 'Kolkata', locality: 'Park Street · sample locality', cuisine: ['Bengali'], type: 'Casual dining', price: 680, rating: 4.5, reviews: 111, dish: 'Kosha Mangsho · Mishti Doi', emoji: '🍲', art: 'art-kolkata', tag: 'Bengal on a plate', description: 'A demo Bengali restaurant concept with comforting regional dishes and a sweet ending.', hours: 'Demo hours: 12:00 PM–10:00 PM', menu: [{category:'Bengali table',items:[['Kosha Mangsho','Slow-cooked Bengali-style mutton curry',390],['Shorshe Paneer','Mustard-inspired vegetarian special',260],['Steamed Rice','Simple rice accompaniment',90]]},{category:'Mishti corner',items:[['Mishti Doi','Sweet fermented yoghurt-style dessert',110],['Rasgulla','Soft syrup-soaked sweet',90]]}] },
+    { id: 'tt-pune-07', name: 'The Deccan Diner', city: 'Pune', locality: 'Koregaon Park · sample locality', cuisine: ['Maharashtrian','Street Food'], type: 'Casual dining', price: 470, rating: 4.3, reviews: 76, dish: 'Misal Pav · Puran Poli', emoji: '🥞', art: 'art-pune', tag: 'Regional bites', description: 'A demo Deccan-inspired spot for bold snacks, regional plates and an easy-going table.', hours: 'Demo hours: 11:00 AM–10:00 PM', menu: [{category:'Regional favourites',items:[['Misal Pav','Spiced sprout curry with pav',170],['Puran Poli','Sweet lentil-stuffed flatbread',130],['Kanda Poha','Flattened rice with onion and spices',100]]},{category:'Drinks',items:[['Solkadhi','Coconut and kokum-style drink',90],['Lemon Soda','Fresh fizzy lemon drink',80]]}] },
+    { id: 'tt-ahm-08', name: 'Thali & Tales', city: 'Ahmedabad', locality: 'Navrangpura · sample locality', cuisine: ['Gujarati','North Indian'], type: 'Casual dining', price: 520, rating: 4.6, reviews: 165, dish: 'Gujarati Thali · Dhokla · Thepla', emoji: '🫓', art: 'art-ahmedabad', tag: 'Thali time', description: 'A demo Gujarati dining concept for a bright thali, snack plates and friendly conversation.', hours: 'Demo hours: 11:30 AM–10:00 PM', menu: [{category:'Gujarati favourites',items:[['Gujarati Thali','Sample spread of seasonal dishes',360],['Khaman Dhokla','Soft steamed savoury snack',130],['Thepla Plate','Spiced flatbreads with accompaniments',160]]},{category:'Something sweet',items:[['Shrikhand','Sweet strained yoghurt dessert',120],['Jalebi','Crisp syrupy spirals',90]]}] },
+    { id: 'tt-jaipur-09', name: 'Oven & Olive', city: 'Jaipur', locality: 'C-Scheme · sample locality', cuisine: ['Italian','Pizza'], type: 'Casual dining', price: 650, rating: 4.5, reviews: 88, dish: 'Wood-fired pizza · Garlic bread', emoji: '🍕', art: 'art-pizza', tag: 'Pizza night', aliases: 'pizza margherita pepperoni italian cheesy oven', description: 'Demo Italian-style spot for pizza cravings and relaxed dinners.', hours: 'Demo hours: 12:00 PM–11:00 PM', menu: [{category:'Pizza favourites',items:[['Margherita Pizza','Tomato, mozzarella and basil',320],['Farmhouse Pizza','Vegetables, cheese and herbs',390],['Garlic Bread','Toasted bread with garlic butter',150]]}] },
+    { id: 'tt-delhi-10', name: 'The Burger Bench', city: 'Delhi', locality: 'South Delhi · sample locality', cuisine: ['American','Burgers'], type: 'Casual dining', price: 480, rating: 4.4, reviews: 73, dish: 'Smash burger · Loaded fries', emoji: '🍔', art: 'art-burger', tag: 'Burger fix', aliases: 'burger cheeseburger fries fast food american', description: 'Demo burger bar for stacked burgers, sides and casual catch-ups.', hours: 'Demo hours: 12:00 PM–10:30 PM', menu: [{category:'Burgers & sides',items:[['Classic Cheeseburger','Grilled patty, cheese and house sauce',290],['Veggie Burger','Crisp vegetable patty and fresh toppings',240],['Loaded Fries','Fries with cheese and seasoning',170]]}] },
+    { id: 'tt-jaipur-11', name: 'Momo Junction', city: 'Jaipur', locality: 'Vaishali Nagar · sample locality', cuisine: ['Tibetan','Street Food'], type: 'Street food', price: 320, rating: 4.3, reviews: 61, dish: 'Steamed momos · Chilli momos', emoji: '🥟', art: 'art-momos', tag: 'Snack break', aliases: 'momo momos dumplings tibetan street food dumpling', description: 'Demo casual spot for steamed dumplings and spicy snack plates.', hours: 'Demo hours: 12:00 PM–10:00 PM', menu: [{category:'Momo favourites',items:[['Steamed Veg Momos','Vegetable-filled steamed dumplings',140],['Chilli Momos','Momos tossed in a spicy sauce',180],['Paneer Momos','Paneer-filled dumplings',170]]}] },
+    { id: 'tt-blr-12', name: 'Pasta Theory', city: 'Bengaluru', locality: 'Indiranagar · sample locality', cuisine: ['Italian','Pasta'], type: 'Casual dining', price: 720, rating: 4.6, reviews: 104, dish: 'Creamy pasta · Pesto linguine', emoji: '🍝', art: 'art-pasta', tag: 'Pasta plans', aliases: 'pasta spaghetti penne alfredo italian noodles', description: 'Demo Italian-inspired kitchen for pasta dishes and an easy evening out.', hours: 'Demo hours: 12:00 PM–10:30 PM', menu: [{category:'Pasta plates',items:[['Creamy Alfredo Pasta','Cream sauce with herbs',340],['Pesto Linguine','Basil pesto and parmesan-style topping',360],['Arrabbiata Penne','Tomato chilli sauce and herbs',310]]}] },
+    { id: 'tt-mumbai-13', name: 'Sweet Spot Studio', city: 'Mumbai', locality: 'Bandra · sample locality', cuisine: ['Desserts','Café'], type: 'Café', price: 390, rating: 4.5, reviews: 59, dish: 'Cheesecake · Chocolate dessert', emoji: '🍰', art: 'art-dessert', tag: 'Something sweet', aliases: 'cake dessert cheesecake chocolate ice cream sweet cafe', description: 'Demo dessert café for a sweet treat and coffee catch-ups.', hours: 'Demo hours: 10:00 AM–9:30 PM', menu: [{category:'Dessert counter',items:[['Classic Cheesecake','Creamy cheesecake-style slice',240],['Chocolate Brownie','Warm chocolate brownie',180],['Ice Cream Sundae','Ice cream with toppings',210]]}] },
+  ];
+  const foodPhotos = {
+    'art-pizza': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1000&q=85',
+    'art-burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85',
+    'art-momos': 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1000&q=85',
+    'art-pasta': 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1000&q=85',
+    'art-dessert': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1000&q=85',
+    'art-jaipur': 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=1000&q=85',
+    'art-delhi': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85',
+    'art-hyd': 'https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=1000&q=85',
+    'art-mumbai': 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1000&q=85',
+    'art-bengaluru': 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85',
+    'art-kolkata': 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=1000&q=85',
+    'art-pune': 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1000&q=85',
+    'art-ahmedabad': 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85'
+  };
+  const $ = id => document.getElementById(id);
+  const state = { query: '', city: '', cuisine: '', filterCuisine: '', filterPrice: '', filterType: '', sort: 'featured', reservations: [], focusedRestaurant: null, externalResults: [] };
+  const modalBackdrop = $('modalBackdrop');
+  const modalPanel = $('modalPanel');
+  const modalTitle = $('modalTitle');
+  const modalSubtitle = $('modalSubtitle');
+  const modalContent = $('modalContent');
+  let toastTimer;
+
+  function money(amount) { return '₹' + amount.toLocaleString('en-IN'); }
+  function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+  }
+  function normalize(value) { return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  function matchRestaurant(r) {
+    const searchable = normalize([r.name, r.city, r.locality, r.cuisine.join(' '), r.dish, r.type, r.description, r.aliases || '', ...(r.menu || []).flatMap(group => group.items.map(item => item[0] + ' ' + item[1]))].join(' '));
+    if (state.query && !r.isExternal) {
+      const q = normalize(state.query).trim();
+      const tokens = q.split(/\s+/).filter(Boolean);
+      const queryAliases = { biryani: 'hyderabadi', dosa: 'south indian', idli: 'south indian', coffee: 'cafe', cafes: 'cafe', cafe: 'cafe', burger: 'burger', pizza: 'pizza', momos: 'momo', momo: 'momo', dumpling: 'momo', pasta: 'pasta', noodle: 'pasta', cake: 'dessert', cheesecake: 'dessert', sweets: 'dessert', sweet: 'dessert', thali: 'thali', dhokla: 'gujarati', thepla: 'gujarati', chole: 'north indian', paneer: 'north indian', pav: 'street food', vada: 'street food', misal: 'street food', dal: 'north indian', naan: 'north indian', ghewar: 'rajasthani' };
+      const expanded = tokens.map(t => queryAliases[t] || t);
+      const matchesToken = tokens.some(t => searchable.includes(t)) || expanded.some(t => searchable.includes(t));
+      if (!searchable.includes(q) && !matchesToken) return false;
+    }
+    if (state.city && r.city !== state.city) return false;
+    if (state.cuisine && !r.isExternal && !r.cuisine.some(c => normalize(c).includes(normalize(state.cuisine)) || normalize(state.cuisine).includes(normalize(c)))) return false;
+    if (state.filterCuisine && !r.isExternal && !r.cuisine.some(c => normalize(c).includes(normalize(state.filterCuisine)))) return false;
+    if (!r.isExternal && state.filterPrice === 'budget' && r.price >= 500) return false;
+    if (!r.isExternal && state.filterPrice === 'mid' && (r.price < 500 || r.price > 900)) return false;
+    if (!r.isExternal && state.filterPrice === 'premium' && r.price < 900) return false;
+    if (!r.isExternal && state.filterType && r.type !== state.filterType) return false;
+    return true;
+  }
+  function getVisibleRestaurants() {
+    const list = [...restaurants, ...state.externalResults].filter(matchRestaurant);
+    if (state.sort === 'price-asc') list.sort((a,b) => a.price - b.price);
+    if (state.sort === 'price-desc') list.sort((a,b) => b.price - a.price);
+    if (state.sort === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+    return list;
+  }
+  function restaurantCard(r) {
+    const cuisine = (r.cuisine || []).map(escapeHTML).join(' · ');
+    return `<article class="restaurant-card">
+      <div class="food-art ${r.art}"><img class="food-photo" src="${escapeHTML(r.image_url || foodPhotos[r.art] || '')}" alt="Food at ${escapeHTML(r.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span class="art-caption">${escapeHTML(r.tag)}</span></div>
+      <div class="card-body">
+        <div class="card-topline"><h3 class="card-name">${escapeHTML(r.name)}</h3><span class="demo-tag">Listing</span></div>
+        <div class="card-meta">${cuisine} · ${escapeHTML(r.city)}</div>
+        <p class="card-dish">Try the mood: <strong>${escapeHTML(r.dish)}</strong></p>
+        <div class="card-stats"><span>★ <strong>${r.rating ? r.rating.toFixed(1) : '—'}</strong> <span>${r.reviews ? '(' + r.reviews + ' reviews)' : '(not rated)'}</span></span><span>Per person <strong>${r.price ? money(r.price) : 'Ask restaurant'}</strong></span></div>
+        <div class="card-actions"><button type="button" class="btn btn-quiet" data-action="details" data-id="${r.id}">View details</button><button type="button" class="btn btn-quiet" data-action="menu" data-id="${r.id}">View menu</button><button type="button" class="btn btn-primary" data-action="book" data-id="${r.id}">Book a table ↗</button></div>
+      </div></article>`;
+  }
+  function renderRestaurants() {
+    const visible = getVisibleRestaurants();
+    const grid = $('restaurantGrid');
+    if (!visible.length) {
+      grid.innerHTML = `<div class="empty-state" style="display:block"><div class="big">🍽️</div><h3>No published restaurants found.</h3><p>The website is connected to its database, but no published listings match this search yet. Clear filters or add approved restaurant records.</p><button class="btn btn-primary" type="button" id="emptyReset">Clear filters</button></div>`;
+    } else {
+      grid.innerHTML = visible.map(restaurantCard).join('');
+    }
+    $('resultCount').textContent = `${visible.length} ${visible.length === 1 ? 'restaurant' : 'restaurants'} loaded from the database · availability must be confirmed by each restaurant`;
+  }
+  function showToast(message) {
+    const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 3400);
+  }
+  function openModal(title, subtitle, html, wide = false) {
+    modalTitle.textContent = title; modalSubtitle.textContent = subtitle || ''; modalContent.innerHTML = html;
+    modalPanel.classList.toggle('modal-wide', wide); modalBackdrop.classList.add('open'); document.body.style.overflow = 'hidden';
+    $('modalClose').focus();
+  }
+  function closeModal() { modalBackdrop.classList.remove('open'); document.body.style.overflow = ''; }
+  function getRestaurant(id) { return restaurants.find(r => r.id === id); }
+  function demoArt(r) { return `<div class="detail-hero ${r.art}" style="background-image:url(&quot;${r.image_url || foodPhotos[r.art] || ''}&quot;)"></div>`; }
+  async function loadRestaurants() {
+    $('resultCount').textContent = 'Loading restaurant listings…';
+    const { data, error } = await supabase.from('restaurants').select('*').eq('is_published', true).order('average_rating', { ascending: false, nullsFirst: false });
+    if (error) {
+      restaurants = [];
+      renderRestaurants();
+      $('resultCount').textContent = 'Could not load restaurants. Check the database connection.';
+      showToast('Restaurant data could not be loaded. Please try again later.');
+      console.error('Supabase restaurant query failed:', error.message);
+      return;
+    }
+    restaurants = (data || []).map(row => {
+      const menu = Array.isArray(row.menu) ? row.menu.map(group => ({
+        category: group.category || 'Menu',
+        items: (group.items || []).map(item => Array.isArray(item) ? item : [item.name || 'Menu item', item.description || '', Number(item.price || 0)])
+      })) : [];
+      const firstItems = menu.flatMap(group => group.items.map(item => item[0]));
+      const cuisine = Array.isArray(row.cuisine) ? row.cuisine : [];
+      return {
+        id: row.id, name: row.name, city: row.city, locality: row.address || row.city,
+        cuisine, type: cuisine[0] || 'Restaurant',
+        price: row.average_cost_for_two ? Math.round(row.average_cost_for_two / 2) : 0,
+        rating: Number(row.average_rating || 0), reviews: Number(row.rating_count || 0),
+        dish: firstItems.slice(0, 3).join(' · ') || cuisine.join(' · ') || 'Restaurant dining',
+        emoji: '🍽️', art: 'art-live', tag: 'Restaurant listing',
+        description: row.description || 'Restaurant details provided by the listing owner.',
+        hours: row.opening_hours && Object.keys(row.opening_hours).length ? JSON.stringify(row.opening_hours) : 'Contact restaurant to confirm hours',
+        menu, image_url: row.image_url, phone: row.phone, website_url: row.website_url,
+        address: row.address, amenities: row.amenities || [], gallery_urls: row.gallery_urls || []
+      };
+    });
+    renderRestaurants();
+  }
+  function searchLivePlaces() {
+    const hasSearch = state.query || state.city || state.cuisine || state.filterCuisine;
+    if (!hasSearch) {
+      state.externalResults = [];
+      renderRestaurants();
+      $('resultCount').textContent = 'Search by restaurant, dish, cuisine or city to find matching places.';
+      return;
+    }
+    const localMatches = restaurants.filter(matchRestaurant);
+    if (localMatches.length) {
+      state.externalResults = [];
+      renderRestaurants();
+      return;
+    }
+    if (!window.google?.maps?.places) {
+      state.externalResults = [];
+      renderRestaurants();
+      $('resultCount').textContent = 'Live place search is unavailable. Check that the Google Maps JavaScript API and Places API are enabled for the site key.';
+      return;
+    }
+    const searchTerm = state.query || state.cuisine || state.filterCuisine || 'restaurants';
+    const textQuery = state.city ? searchTerm + ' in ' + state.city + ', India' : searchTerm;
+    $('resultCount').textContent = 'Searching Google Places…';
+    const service = new google.maps.places.PlacesService(document.createElement('div'));
+    service.textSearch({ query: textQuery }, (results, status) => {
+      if (status !== google.maps.places.PlacesServiceStatus.OK || !results) {
+        state.externalResults = [];
+        renderRestaurants();
+        $('resultCount').textContent = status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS
+          ? 'No matching places found. Try another dish, cuisine or city.'
+          : 'Live place search failed. Check the Google API key, enabled APIs and referrer restrictions.';
+        return;
+      }
+      state.externalResults = results.map(place => {
+        const address = place.formatted_address || place.vicinity || '';
+        const city = state.city || address.split(',').slice(-3, -2)[0]?.trim() || '';
+        const cuisine = state.cuisine || state.filterCuisine || 'Restaurant';
+        let imageUrl = '';
+        try { imageUrl = place.photos?.[0]?.getUrl({ maxWidth: 1000, maxHeight: 700 }) || ''; } catch (_) {}
+        return {
+          id: place.place_id, external_place_id: place.place_id, isExternal: true,
+          name: place.name || 'Restaurant', city, locality: address, address,
+          cuisine: [cuisine], type: 'Restaurant', price: 0,
+          rating: Number(place.rating || 0), reviews: Number(place.user_ratings_total || 0),
+          dish: state.query || cuisine, emoji: '🍽️', art: 'art-live',
+          tag: 'Google Places', description: 'Place details returned by Google Places. Confirm menu, hours and table availability with the restaurant.',
+          hours: place.opening_hours?.isOpen ? 'Reported open now by Google Places' : 'Contact restaurant to confirm hours',
+          menu: [], image_url: imageUrl
+        };
+      });
+      renderRestaurants();
+      $('resultCount').textContent = state.externalResults.length + ' live Google Places results · table requests require restaurant confirmation';
+    });
+  }
+  function showDetails(id) {
+    const r = getRestaurant(id); if (!r) return;
+    state.focusedRestaurant = r.id;
+    openModal(r.name, `${r.cuisine.join(' · ')} · ${r.city}`, `${demoArt(r)}<div class="demo-warning"><strong>Demo listing.</strong> This restaurant profile, address context, rating and pricing are illustrative and are not verified business information.</div><p style="font-size:13px;line-height:1.75;color:var(--muted);margin-top:0">${r.description}</p><div class="detail-list"><div class="detail-item"><span class="label">Location</span><strong>${r.locality}, ${r.city} <span style="font-weight:500;color:var(--muted)">(sample)</span></strong></div><div class="detail-item"><span class="label">Price per person</span><strong>${money(r.price)} <span style="font-weight:500;color:var(--muted)">(sample)</span></strong></div><div class="detail-item"><span class="label">Opening hours</span><strong>${r.hours}</strong></div><div class="detail-item"><span class="label">Demo rating</span><strong>★ ${r.rating.toFixed(1)} from ${r.reviews} sample reviews</strong></div></div><div class="demo-warning">Map coordinates, phone number, accessibility, amenities and real table availability are not connected in this preview.</div><div class="form-actions"><button class="btn btn-quiet" type="button" data-modal-action="directions" data-id="${r.id}">Directions info</button><button class="btn btn-quiet" type="button" data-modal-action="menu" data-id="${r.id}">Browse menu</button><button class="btn btn-primary" type="button" data-modal-action="book" data-id="${r.id}">Book a table ↗</button></div>`, true);
+  }
+  function showMenu(id) {
+    const r = getRestaurant(id); if (!r) return;
+    const body = r.menu.map(category => `<div class="menu-category"><h3>${category.category}</h3>${category.items.map((item, i) => `<div class="menu-item"><div><strong>${item[0]}</strong><small>${item[1]}</small></div><div class="menu-price">${money(item[2])}</div></div>`).join('')}</div>`).join('');
+    openModal(`${r.name} · Menu`, 'Browsing only · no food ordering or checkout', `${demoArt(r)}<div class="demo-warning">Illustrative menu and prices for this prototype. Confirm current menu details with the restaurant before visiting.</div>${body}<div class="form-actions"><button class="btn btn-quiet" type="button" data-modal-action="details" data-id="${r.id}">Restaurant details</button><button class="btn btn-primary" type="button" data-modal-action="book" data-id="${r.id}">Reserve a table ↗</button></div>`, true);
+  }
+  function todayLocal() {
+    const now = new Date(); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000); return local.toISOString().slice(0,10);
+  }
+  function showAuth(mode = 'signin') {
+    const isSignup = mode === 'signup';
+    openModal(isSignup ? 'Create your account' : 'Welcome back', 'Sign in to save and manage your reservations', `<form id="authForm"><div class="form-grid"><div class="field full"><label for="authEmail">Email</label><input class="field-control" id="authEmail" name="email" type="email" autocomplete="email" required></div><div class="field full"><label for="authPassword">Password</label><input class="field-control" id="authPassword" name="password" type="password" minlength="8" autocomplete="${isSignup ? 'new-password' : 'current-password'}" required></div></div><p class="help-text">Use at least 8 characters. Never share your password with anyone.</p><div class="form-actions"><button class="btn btn-quiet" type="button" id="authSwitch">${isSignup ? 'Already have an account? Sign in' : 'New here? Create an account'}</button><button class="btn btn-primary" type="submit">${isSignup ? 'Create account' : 'Sign in'}</button></div></form>`);
+    $('authSwitch').addEventListener('click', () => showAuth(isSignup ? 'signin' : 'signup'));
+    $('authForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = new FormData(e.currentTarget);
+      const email = String(form.get('email')).trim();
+      const password = String(form.get('password'));
+      const result = isSignup
+        ? await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) { showToast(result.error.message); return; }
+      if (isSignup && !result.data.session) {
+        openModal('Check your email', 'Confirm your account to finish signing up', '<p class="help-text">Supabase may require email confirmation before you can sign in. Check your inbox and then return here.</p>');
+        return;
+      }
+      currentUser = result.data.user || result.data.session?.user || null;
+      $('authOpen').textContent = currentUser ? 'Sign out' : 'Sign in';
+      showToast(currentUser ? 'You are signed in.' : 'Account updated.');
+      closeModal();
+    });
+  }
+  function showBooking(id) {
+    const r = getRestaurant(id); if (!r) return;
+    if (!currentUser) { showAuth('signin'); showToast('Sign in first to save a reservation.'); return; }
+    state.focusedRestaurant = r.id;
+    const times = ['12:00 PM','12:30 PM','1:00 PM','1:30 PM','6:00 PM','6:30 PM','7:00 PM','7:30 PM','8:00 PM','8:30 PM'];
+    openModal('Reserve your table', `${r.name} · ${r.city}`, `<div class="demo-warning"><strong>Prototype booking only.</strong> Time slots below are examples, not actual availability. Submitting creates a temporary demo reservation in this preview; nothing is sent to the restaurant.</div><form id="bookingForm"><div class="form-grid"><div class="field"><label for="bookingDate">Date</label><input class="field-control" id="bookingDate" name="date" type="date" min="${todayLocal()}" value="${todayLocal()}" required></div><div class="field"><label for="bookingTime">Time slot</label><select class="field-control" id="bookingTime" name="time" required>${times.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="field"><label for="bookingGuests">Guests</label><select class="field-control" id="bookingGuests" name="guests" required>${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===2?'selected':''}>${n} ${n===1?'guest':'guests'}</option>`).join('')}</select></div><div class="field"><label for="bookingName">Your name</label><input class="field-control" id="bookingName" name="name" placeholder="Name for the table" autocomplete="name" minlength="2" maxlength="70" required></div><div class="field"><label for="bookingPhone">Mobile number</label><input class="field-control" id="bookingPhone" name="phone" type="tel" placeholder="10-digit mobile number" inputmode="tel" pattern="[0-9 +()-]{10,18}" autocomplete="tel" required></div><div class="field"><label for="bookingEmail">Email (optional)</label><input class="field-control" id="bookingEmail" name="email" type="email" placeholder="you@example.com" autocomplete="email"></div><div class="field full"><label for="bookingNotes">Special request (optional)</label><textarea class="field-control" id="bookingNotes" name="notes" rows="3" maxlength="250" placeholder="A high chair, access needs, a birthday note…" style="height:auto;padding-top:12px;padding-bottom:12px;resize:vertical"></textarea></div></div><p class="help-text">In production, the server must validate all fields, check availability, prevent conflicts and save the booking before showing a confirmed status.</p><div class="form-actions"><button type="button" class="btn btn-quiet" data-modal-action="details" data-id="${r.id}">Back to details</button><button type="submit" class="btn btn-primary">Create demo reservation ↗</button></div></form>`, true);
+    modalContent.querySelector('.demo-warning').innerHTML = '<strong>Reservation request.</strong> The request will be saved to your account. The selected time is not live availability; the restaurant must confirm the table.';
+    $('bookingForm').querySelector('button[type="submit"]').textContent = 'Send reservation request ↗';
+    $('bookingForm').addEventListener('submit', async e => {
+      e.preventDefault(); const form = e.currentTarget;
+      if (!form.reportValidity()) return;
+      const fd = new FormData(form); const date = String(fd.get('date'));
+      if (date < todayLocal()) { $('bookingDate').setCustomValidity('Choose today or a future date.'); $('bookingDate').reportValidity(); $('bookingDate').setCustomValidity(''); return; }
+      const timeText = String(fd.get('time'));
+      const parts = timeText.split(' '); const clock = parts[0].split(':').map(Number);
+      let hours = clock[0]; const minutes = clock[1];
+      if (parts[1] === 'PM' && hours !== 12) hours += 12;
+      if (parts[1] === 'AM' && hours === 12) hours = 0;
+      const time = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':00';
+      const payload = {
+        user_id: currentUser.id, restaurant_id: r.isExternal ? null : r.id,
+        external_place_id: r.isExternal ? r.external_place_id : null,
+        external_restaurant_name: r.isExternal ? r.name : null,
+        external_city: r.isExternal ? r.city : null,
+        external_address: r.isExternal ? r.address : null,
+        external_photo_url: r.isExternal ? r.image_url : null,
+        guest_name: String(fd.get('name')).trim(),
+        guest_email: String(fd.get('email') || currentUser.email || '').trim() || currentUser.email,
+        guest_phone: String(fd.get('phone')).trim(),
+        reservation_date: date, reservation_time: time,
+        guest_count: Number(fd.get('guests')),
+        special_requests: String(fd.get('notes') || '').trim() || null
+      };
+      const { data, error } = await supabase.from('reservations').insert(payload).select('id,booking_reference,reservation_date,reservation_time,guest_count,status').single();
+      if (error) { showToast('Reservation could not be saved: ' + error.message); return; }
+      showConfirmation({ id: data.booking_reference, restaurant: r.name, city: r.city, date: data.reservation_date, time: timeText, guests: data.guest_count, name: payload.guest_name, status: data.status });
+    });
+  }
+  function showConfirmation(res) {
+    openModal('Your demo table is pencilled in.', 'A preview confirmation — not a real restaurant booking', `<div style="text-align:center;padding:6px 0 12px"><div style="margin:0 auto 16px;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:31px">✓</div><div class="kicker">Demo reference</div><div class="ref-code" style="font-size:18px;margin:7px 0 16px">${res.id}</div><p style="font-size:13px;color:var(--muted);line-height:1.7;max-width:440px;margin:0 auto">${res.name}, this sample reservation is saved in the current page session only. No table has been reserved and no message has been sent to ${res.restaurant}.</p></div><div class="detail-list"><div class="detail-item"><span class="label">Restaurant</span><strong>${res.restaurant}</strong></div><div class="detail-item"><span class="label">Date & time</span><strong>${res.date} · ${res.time}</strong></div><div class="detail-item"><span class="label">Party size</span><strong>${res.guests} ${res.guests===1?'guest':'guests'}</strong></div><div class="detail-item"><span class="label">Status</span><strong>Demo only · not confirmed externally</strong></div></div><div class="form-actions"><button class="btn btn-quiet" type="button" id="confirmClose">Close</button><button class="btn btn-primary" type="button" id="confirmMyBookings">View my demo reservations ↗</button></div>`, true);
+    $('confirmClose').addEventListener('click', closeModal); $('confirmMyBookings').addEventListener('click', showMyReservations);
+  }
+  function showMyReservations() {
+    if (!state.reservations.length) {
+      openModal('My reservations', 'Your demo bookings stay in this page session', `<div style="text-align:center;padding:20px"><div style="font-size:38px">🗓️</div><h3 style="margin:10px 0 6px">Nothing on the table yet.</h3><p style="color:var(--muted);font-size:12px;max-width:360px;margin:0 auto 18px">Try a sample booking to see how the reservation details and reference number appear.</p><button class="btn btn-primary" type="button" id="browseFromBookings">Find a restaurant ↗</button></div>`);
+      $('browseFromBookings').addEventListener('click', () => { closeModal(); $('discover').scrollIntoView({behavior:'smooth'}); }); return;
+    }
+    const html = `<div class="demo-warning">These are temporary demo entries held in this page session only. They are not sent to restaurants and are not real reservations.</div>${state.reservations.map(r=>`<div class="reservation-item"><div><h3>${r.restaurant}</h3><p>${r.date} · ${r.time} · ${r.guests} ${r.guests===1?'guest':'guests'}</p><p class="ref-code">${r.id}</p><span class="badge-status">${r.status}</span></div><div><button class="btn btn-quiet btn-small" type="button" data-cancel="${r.id}">Remove demo entry</button></div></div>`).join('')}`;
+    openModal('My reservations', `${state.reservations.length} demo ${state.reservations.length===1?'entry':'entries'}`, html, true);
+  }
+  function showDetails(id) {
+    const r = getRestaurant(id); if (!r) return;
+    state.focusedRestaurant = r.id;
+    const address = r.address || r.locality || r.city;
+    const price = r.price ? money(r.price) + ' per person (estimate)' : 'Ask restaurant';
+    const rating = r.rating ? '★ ' + r.rating.toFixed(1) + (r.reviews ? ' · ' + r.reviews + ' reviews' : '') : 'Not rated yet';
+    openModal(r.name, (r.cuisine || []).join(' · ') + ' · ' + r.city, `${demoArt(r)}<p style="font-size:13px;line-height:1.75;color:var(--muted)">${r.description || 'Restaurant details are provided by the listing.'}</p><div class="detail-list"><div class="detail-item"><span class="label">Address</span><strong>${address}</strong></div><div class="detail-item"><span class="label">Price</span><strong>${price}</strong></div><div class="detail-item"><span class="label">Opening hours</span><strong>${r.hours}</strong></div><div class="detail-item"><span class="label">Rating</span><strong>${rating}</strong></div></div><div class="form-actions"><button class="btn btn-quiet" type="button" data-modal-action="menu" data-id="${r.id}">Browse menu</button><button class="btn btn-primary" type="button" data-modal-action="book" data-id="${r.id}">Request a table ↗</button></div>`, true);
+  }
+  function showMenu(id) {
+    const r = getRestaurant(id); if (!r) return;
+    const body = (r.menu || []).map(category => `<div class="menu-category"><h3>${category.category || 'Menu'}</h3>${(category.items || []).map(item => `<div class="menu-item"><div><strong>${item[0]}</strong><small>${item[1] || ''}</small></div><div class="menu-price">${Number(item[2]) ? money(Number(item[2])) : 'Ask restaurant'}</div></div>`).join('')}</div>`).join('');
+    openModal(`${r.name} · Menu`, 'Menu details · no food ordering', `${demoArt(r)}${body || '<p class="help-text">The restaurant has not added menu items yet.</p>'}<div class="form-actions"><button class="btn btn-quiet" type="button" data-modal-action="details" data-id="${r.id}">Restaurant details</button><button class="btn btn-primary" type="button" data-modal-action="book" data-id="${r.id}">Request a table ↗</button></div>`, true);
+  }
+  async function showConfirmation(res) {
+    const statusLabel = res.status === 'confirmed' ? 'Confirmed by restaurant' : 'Request saved · awaiting restaurant response';
+    openModal('Reservation request saved', 'Your reference number is ready', `<div style="text-align:center;padding:6px 0 12px"><div class="kicker">Booking reference</div><div class="ref-code" style="font-size:20px;margin:8px 0 14px">${res.id}</div><p style="font-size:13px;color:var(--muted);line-height:1.7;max-width:440px;margin:0 auto">Your request has been saved to your account. This is not a confirmed table until the restaurant confirms availability.</p></div><div class="detail-list"><div class="detail-item"><span class="label">Restaurant</span><strong>${res.restaurant}</strong></div><div class="detail-item"><span class="label">Date & time</span><strong>${res.date} · ${res.time}</strong></div><div class="detail-item"><span class="label">Party size</span><strong>${res.guests} ${res.guests===1?'guest':'guests'}</strong></div><div class="detail-item"><span class="label">Status</span><strong>${statusLabel}</strong></div></div><div class="form-actions"><button class="btn btn-quiet" type="button" id="confirmClose">Close</button><button class="btn btn-primary" type="button" id="confirmMyBookings">My reservations ↗</button></div>`, true);
+    $('confirmClose').addEventListener('click', closeModal);
+    $('confirmMyBookings').addEventListener('click', showMyReservations);
+  }
+  async function showMyReservations() {
+    if (!currentUser) { showAuth('signin'); return; }
+    const { data, error } = await supabase.from('reservations').select('id,booking_reference,reservation_date,reservation_time,guest_count,status,external_restaurant_name,external_city,restaurants(name,city)').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    if (error) { showToast('Could not load reservations: ' + error.message); return; }
+    const entries = data || [];
+    if (!entries.length) {
+      openModal('My reservations', 'Your saved booking requests', '<div style="text-align:center;padding:20px"><div style="font-size:38px">🗓️</div><h3 style="margin:10px 0 6px">No reservations yet.</h3><p class="help-text">Choose a published restaurant and request a table to see it here.</p></div>');
+      return;
+    }
+    const formatTime = value => { const [h,m] = value.split(':').map(Number); return new Date(2000,0,1,h,m).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); };
+    const html = entries.map(item => {
+      const restaurant = item.restaurants?.name || item.external_restaurant_name || 'Restaurant';
+      const city = item.restaurants?.city || item.external_city || '';
+      const canCancel = item.status === 'pending';
+      return `<div class="reservation-item"><div><h3>${restaurant}</h3><p>${city} · ${item.reservation_date} · ${formatTime(item.reservation_time)}</p><p>${item.guest_count} ${item.guest_count===1?'guest':'guests'}</p><p class="ref-code">${item.booking_reference}</p><span class="badge-status">${item.status}</span></div><div>${canCancel ? `<button class="btn btn-quiet btn-small" type="button" data-db-cancel="${item.id}">Cancel request</button>` : ''}</div></div>`;
+    }).join('');
+    openModal('My reservations', `${entries.length} saved ${entries.length===1?'reservation':'reservations'}`, html, true);
+  }
+  function showDirectionsInfo(id) {
+    const r = getRestaurant(id); if (!r) return;
+    openModal('Directions are not connected yet', r.name, `<div class="demo-warning">This listing uses a sample locality, not a verified business address or map coordinate.</div><p style="font-size:13px;line-height:1.75;color:var(--muted)">The live version should open a navigation service only after the restaurant's address or coordinates have been verified. This preview intentionally avoids inventing a destination.</p><div class="form-actions"><button class="btn btn-primary" type="button" id="directionBack">Back to restaurant</button></div>`);
+    $('directionBack').addEventListener('click', () => showDetails(id));
+  }
+  function showDashboard(kind) {
+    const isAdmin = kind === 'admin';
+    const title = isAdmin ? 'Platform admin preview' : 'Restaurant owner dashboard';
+    const sub = isAdmin ? 'Concept view · secure admin access not implemented' : 'Concept view · owner sign-in not implemented';
+    const panels = isAdmin ? `<div class="dashboard-panel"><h3>Platform overview</h3><p>Restaurants submitted: <strong>—</strong> · Reservations: <strong>—</strong> · Active cities: <strong>—</strong></p><p>Live metrics will appear once an authenticated backend and verified production database are connected.</p></div><div class="dashboard-panel"><h3>Admin capabilities</h3><ul><li>Review restaurant submissions and ownership</li><li>Manage users, roles, cities and cuisine categories</li><li>Review reports and monitor cancellations</li><li>Audit listings for duplicates and misleading information</li></ul></div>` : `<div class="dashboard-panel"><h3>Your restaurant, in one place</h3><p>No restaurant account is connected in this prototype. The live dashboard should restrict edits to restaurants assigned to the signed-in owner.</p></div><div class="dashboard-panel"><h3>Restaurant tools</h3><ul><li>Update profile, verified address, photos and hours</li><li>Manage cuisine tags, menu categories, prices and dish availability</li><li>Configure tables, capacity and booking windows</li><li>Review upcoming reservations and update their status</li></ul></div>`;
+    openModal(title, sub, `<div class="demo-warning">UI concept only. Authentication, role checks, database writes and booking management need a secure backend before production use.</div>${panels}<div class="dashboard-panel"><h3>Next step for a production build</h3><p>Connect role-based authentication, server-side authorization, a relational database and auditable management APIs. Keep secrets and API keys server-side.</p></div><div class="form-actions"><button class="btn btn-quiet" type="button" id="dashboardClose">Close preview</button><button class="btn btn-primary" type="button" id="dashboardLearn">See restaurant listings</button></div>`, true);
+    $('dashboardClose').addEventListener('click', closeModal); $('dashboardLearn').addEventListener('click', () => { closeModal(); $('discover').scrollIntoView({behavior:'smooth'}); });
+  }
+  function resetFilters() {
+    state.query = ''; state.city = ''; state.cuisine = ''; state.filterCuisine = ''; state.filterPrice = ''; state.filterType = ''; state.sort = 'featured';
+    state.externalResults = [];
+    $('searchQuery').value = ''; $('cityQuery').value = ''; $('cuisineQuery').value = ''; $('filterCuisine').value = ''; $('filterPrice').value = ''; $('filterType').value = ''; $('sortBy').value = 'featured';
+    document.querySelectorAll('[data-cuisine].active').forEach(el => el.classList.remove('active'));
+    renderRestaurants();
+  }
+  async function applySearch() {
+    state.query = $('searchQuery').value.trim(); state.city = $('cityQuery').value; state.cuisine = $('cuisineQuery').value;
+    state.filterCuisine = $('filterCuisine').value; state.filterPrice = $('filterPrice').value; state.filterType = $('filterType').value; state.sort = $('sortBy').value;
+    await searchLivePlaces();
+    $('discover').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  $('searchForm').addEventListener('submit', e => { e.preventDefault(); applySearch(); });
+  $('searchQuery').addEventListener('input', () => { state.query = $('searchQuery').value.trim(); renderRestaurants(); });
+  $('cityQuery').addEventListener('change', applySearch);
+  $('cuisineQuery').addEventListener('change', applySearch);
+  ['filterCuisine','filterPrice','filterType','sortBy'].forEach(id => $(id).addEventListener('change', applySearch));
+  document.querySelectorAll('[data-cuisine]').forEach(btn => btn.addEventListener('click', () => {
+    const cuisine = btn.dataset.cuisine; state.cuisine = cuisine; state.filterCuisine = ''; $('cuisineQuery').value = cuisine; $('filterCuisine').value = ''; $('searchQuery').value = ''; state.query = '';
+    document.querySelectorAll('[data-cuisine].active').forEach(el => el.classList.remove('active')); btn.classList.add('active'); applySearch();
+  }));
+  document.querySelectorAll('[data-city]').forEach(btn => btn.addEventListener('click', () => { state.city = btn.dataset.city; $('cityQuery').value = state.city; applySearch(); }));
+  $('clearFilters').addEventListener('click', resetFilters); $('clearAllTop').addEventListener('click', () => { resetFilters(); $('discover').scrollIntoView({behavior:'smooth'}); });
+  $('allCuisinesBtn').addEventListener('click', () => { resetFilters(); $('discover').scrollIntoView({behavior:'smooth'}); });
+  $('emptyReset')?.addEventListener('click', resetFilters);
+  $('restaurantGrid').addEventListener('click', e => {
+    const button = e.target.closest('[data-action]');
+    if (button) { const {action,id} = button.dataset; if (action==='details') showDetails(id); if (action==='menu') showMenu(id); if (action==='book') showBooking(id); return; }
+    if (e.target.closest('#emptyReset')) resetFilters();
+  });
+  modalContent.addEventListener('click', e => {
+    const action = e.target.closest('[data-modal-action]');
+    if (action) { const {action:kind,id} = action.dataset; if (kind==='details') showDetails(id); if (kind==='menu') showMenu(id); if (kind==='book') showBooking(id); if (kind==='directions') showDirectionsInfo(id); return; }
+    const cancel = e.target.closest('[data-cancel]');
+    if (cancel) { const id = cancel.dataset.cancel; state.reservations = state.reservations.filter(r => r.id !== id); showMyReservations(); showToast('Removed the demo entry from this preview.'); }
+  });
+  modalContent.addEventListener('click', async e => {
+    const button = e.target.closest('[data-db-cancel]');
+    if (!button || !currentUser) return;
+    button.disabled = true;
+    const { data, error } = await supabase.from('reservations').update({ status: 'cancelled' }).eq('id', button.dataset.dbCancel).eq('user_id', currentUser.id).eq('status', 'pending').select('id');
+    if (error || !data?.length) { showToast('Could not cancel this request. It may already be updated.'); button.disabled = false; return; }
+    showToast('Reservation request cancelled.');
+    await showMyReservations();
+  });
+  $('modalClose').addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalBackdrop.classList.contains('open')) closeModal(); });
+  $('myBookingsBtn').addEventListener('click', showMyReservations);
+  $('authOpen').addEventListener('click', async () => {
+    if (!currentUser) { showAuth('signin'); return; }
+    const { error } = await supabase.auth.signOut();
+    if (error) { showToast('Could not sign out: ' + error.message); return; }
+    currentUser = null;
+    $('authOpen').textContent = 'Sign in';
+    showToast('Signed out.');
+  });
+  $('heroBook').addEventListener('click', () => { $('discover').scrollIntoView({behavior:'smooth'}); $('searchQuery').focus({preventScroll:true}); showToast('Choose a sample listing to try the demo reservation flow.'); });
+  $('ctaExplore').addEventListener('click', () => { resetFilters(); $('discover').scrollIntoView({behavior:'smooth'}); });
+  $('ownerOpen').addEventListener('click', () => showDashboard('owner'));
+  $('footerOwner').addEventListener('click', () => showDashboard('owner'));
+  $('footerAdmin').addEventListener('click', () => showDashboard('admin'));
+  $('footerAbout').addEventListener('click', () => openModal('About TheTestTrial', 'Restaurant discovery and table booking', `<p style="font-size:13px;line-height:1.8;color:var(--muted);margin-top:0">The site reads published restaurant listings from its connected Supabase database. Users can create an account, request a table, view saved reservation requests and cancel pending requests.</p><div class="demo-warning">Restaurant availability is not live-checked and booking requests are not automatically confirmed by restaurants. Only listings added and published in the database appear in search. A live external restaurant-data provider and restaurant-side confirmation workflow are still required.</div><p style="font-size:12px;color:var(--muted)">No food ordering, cart, checkout or delivery flow is included.</p>`));
+  supabase.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user || null;
+    $('authOpen').textContent = currentUser ? 'Sign out' : 'Sign in';
+  });
+  // Load only published restaurant records from the connected database.
+  renderRestaurants();
+  $('resultCount').textContent = 'Search by restaurant, dish, cuisine or city to find matching places.';
+  loadRestaurants();
+})();
+</script>
 </body>
 </html>

@@ -726,7 +726,7 @@ footer { padding: 26px 0 32px; border-top: 1px solid var(--line); }
     $('discover').scrollIntoView({behavior:'smooth', block:'start'});
   }
   $('searchForm').addEventListener('submit', e => { e.preventDefault(); applySearch(); });
-  $('searchQuery').addEventListener('input', () => { state.query = $('searchQuery').value.trim(); renderRestaurants(); });
+  $('searchQuery').addEventListener('input', () => { state.query = $('searchQuery').value.trim(); state.externalResults = []; renderRestaurants(); });
   $('cityQuery').addEventListener('change', applySearch);
   $('cuisineQuery').addEventListener('change', applySearch);
   ['filterCuisine','filterPrice','filterType','sortBy'].forEach(id => $(id).addEventListener('change', applySearch));
